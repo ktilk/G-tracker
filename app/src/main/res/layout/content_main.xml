@@ -24,8 +24,7 @@
         android:background="#CCFFFFFF"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="46dp">
+        android:layout_alignParentStart="true">
 
         <Button
             android:id="@+id/buttonAddWayPoint"
@@ -34,7 +33,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:onClick="buttonAddWayPointClicked"
-            android:text="WayPoint" />
+            android:text="@string/waypoint" />
 
         <Button
             android:id="@+id/buttonCounterReset"
@@ -44,7 +43,7 @@
             android:layout_marginRight="6dp"
             android:layout_toLeftOf="@id/buttonAddWayPoint"
             android:onClick="buttonCResetClicked"
-            android:text="CReset" />
+            android:text="@string/creset" />
 
         <TextView
             android:id="@+id/label_WP"

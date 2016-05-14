@@ -98,12 +98,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(toolbar);
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //textViewBroadcast.setText(intent.toString()+" "+(new Date()).toString());
-
+                if (intent.getAction().equals("notification-broadcast-addwaypoint")){
+                    addWayPoint();
+                }
+                if (intent.getAction().equals("notification-broadcast-resettripmeter")){
+                    resetTracker();
+                }
             }
         };
 
@@ -138,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (locationPrevious != null){
             // do something with initial position? yes
-            locationStart = locationPrevious;
+            locationPrevious = null;
         }
 
         textViewWPCount = (TextView) findViewById(R.id.textview_wpcount);
@@ -149,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         textViewWayPointDistanceLine = (TextView) findViewById(R.id.textview_wp_line);
         textViewCResetDistance = (TextView) findViewById(R.id.textview_creset_distance);
         textViewCresetDistanceLine = (TextView) findViewById(R.id.textview_creset_line);
-        textViewSpeed = (TextView) findViewById(R.id.textview_speed);
 
         createNotification();
     }
@@ -166,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         textViewCResetDistance.setText(df.format(cResetDistance));
         textViewCresetDistanceLine.setText(df.format(cResetDistanceLine));
 
-        textViewSpeed.setText(df.format(speedCurrent));
+        textViewSpeed.setText(df.format(speedCurrent) + "m/s");
 
     }
 
@@ -182,11 +184,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // distance from last waypoint
         if (markerCount != 0){
             wayPointDistance += distance;
+        }else {
+            wayPointDistance = 0;
         }
+
         // line distance from last waypoint
         if (locationLastWP != null){
             wayPointDistanceLine = locationLastWP.distanceTo(currentLocation);
+        }else{
+            wayPointDistanceLine = 0;
         }
+
         // distance from last counter reset
         cResetDistance += distance;
 
@@ -246,8 +254,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             default:
                 return super.onOptionsItemSelected(item);
         }
-
-
     }
 
 
@@ -352,7 +358,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void buttonAddWayPointClicked(View view){
+        addWayPoint();
+    }
 
+    public void addWayPoint(){
         wayPointDistance = 0; // reset distance from waypoint
 
         if (locationPrevious==null){
@@ -373,8 +382,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void resetTracker(){
         locationLastCReset = locationPrevious;
-        mGoogleMap.clear();
+        locationLastWP = null;
         markerCount = 0;
+        textViewWPCount.setText(Integer.toString(markerCount));
+        mGoogleMap.clear();
+
         cResetDistance = 0;
     }
 
@@ -421,8 +433,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (mOptionsMenu.findItem(R.id.menu_trackpositionline).isChecked()) {
             List<LatLng> points = mPolylineLine.getPoints();
+
             if (points.isEmpty()){
-                points.add(newPoint);
+                if (locationStart != null){
+                    points.add(new LatLng(locationStart.getLatitude(), locationStart.getLongitude()));
+                }else{
+                    points.add(newPoint);
+                }
             }else if (points.size() == 2){
                 points.set(1, newPoint);
             }else {
@@ -557,9 +574,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 getPackageName(), R.layout.notification);
         DecimalFormat df = new DecimalFormat("#");
         df.setRoundingMode(RoundingMode.HALF_UP);
-        textViewTotalDistance.setText(df.format(totalDistance));
         remoteView.setTextViewText(R.id.textViewTripmeterMetricsNotif, df.format(cResetDistance));
-        remoteView.setTextViewText(R.id.textViewWayPointMetricsNotif, "" + markerCount);
+        remoteView.setTextViewText(R.id.textViewWayPointMetricsNotif, Integer.toString(markerCount));
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setContent(remoteView)
+                        .setSmallIcon(R.drawable.ic_my_location_white_48dp);
+
+        mNotificationManager.notify(4, mBuilder.build());
     }
 
     @Override
