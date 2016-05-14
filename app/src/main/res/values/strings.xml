@@ -1,9 +1,10 @@
 <resources>
-    <string name="app_name">GMapDemo02</string>
+    <string name="app_name">G-tracker</string>
 
     <string name="menu_mylocation">My Location</string>
     <string name="menu_trackposition">Track position</string>
     <string name="menu_keepmapcentered">Keep position centered</string>
+    <string name="menu_trackpositionline">Track position line</string>
 
     <string name="menu_map_type">Map Type...</string>
     <string name="menu_map_type_normal">Normal</string>
@@ -21,5 +22,5 @@
     <string name="menu_map_zoom_20">Zoom level - buildings</string>
 
     <string name="map_not_ready">Map not ready yet!</string>
-    <string name="menu_trackpositionline">Track position line</string>
+
 </resources>
